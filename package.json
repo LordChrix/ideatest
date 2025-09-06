@@ -1,0 +1,31 @@
+{
+  "name": "tsm-idea-builder",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@lottiefiles/react-lottie-player": "^3.5.3",
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "@vercel/analytics": "^1.5.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.2",
+    "lottie-react": "^2.4.1",
+    "next": "14.0.4",
+    "react": "^18",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "typescript": "^5"
+  }
+}
