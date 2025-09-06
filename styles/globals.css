@@ -667,15 +667,17 @@ body::after {
 }
 
 .component-card.dragging {
-    opacity: 0.9;
+    opacity: 0.95;
     cursor: grabbing !important;
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 20px 40px rgba(6, 182, 212, 0.4), 0 0 0 2px var(--primary), 0 0 20px rgba(6, 182, 212, 0.6);
+    transform: scale(1.02) rotate(1deg);
+    box-shadow: 0 25px 50px rgba(6, 182, 212, 0.5), 0 0 0 3px var(--primary), 0 0 30px rgba(6, 182, 212, 0.7);
     z-index: 10000 !important;
     border: 2px solid var(--primary);
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05));
     backdrop-filter: blur(8px);
     animation: dragPulse 0.6s ease-in-out infinite alternate;
+    pointer-events: none; /* Prevent interaction while dragging */
+    transition: none !important; /* Remove transitions while dragging */
 }
 
 .component-emoji {
@@ -3524,8 +3526,21 @@ button:focus-visible,
 
 .fab-dropdown {
   position: absolute;
-  bottom: 70px;
+  bottom: 75px;
   right: 0;
+  transform: translateY(-10px);
+}
+
+/* Mobile: Position dropdown to open upwards */
+@media (max-width: 768px) {
+  .fab-dropdown {
+    bottom: 80px; /* More space from button */
+    right: -5px;
+    transform: translateY(-20px); /* Move up significantly on mobile */
+    max-height: 60vh; /* Limit height on mobile */
+    overflow-y: auto;
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1);
+  }
 }
 
 /* Consultation Modal - CRITICAL FIX */
@@ -3796,10 +3811,30 @@ button:focus-visible,
   box-shadow: 0 8px 25px rgba(6, 182, 212, 0.25);
 }
 
+/* Enhanced mobile drag behavior */
 .component-card.dragging {
-  transform: rotate(5deg);
-  opacity: 0.8;
+  transform: rotate(1deg) scale(1.02);
+  opacity: 0.9;
   cursor: grabbing;
+  z-index: 9999;
+  pointer-events: none;
+  transition: none !important;
+}
+
+/* Better drag handle for touch devices */
+@media (max-width: 768px) {
+  .component-card {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  
+  .component-card.selected {
+    background: rgba(6, 182, 212, 0.1);
+    border: 2px solid var(--primary);
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
+  }
 }
 
 .drop-zone-empty {
@@ -3828,6 +3863,26 @@ button:focus-visible,
 @media (max-width: 768px) {
   .component-card {
     cursor: pointer;
+    position: relative;
+  }
+  
+  .component-card::after {
+    content: 'TAP TO ADD';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 0.6rem;
+    font-weight: bold;
+    color: rgba(6, 182, 212, 0.7);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .component-card:hover::after {
+    opacity: 1;
   }
   
   .toast-notification {
@@ -3840,5 +3895,36 @@ button:focus-visible,
   .toast-notification.toast-show {
     transform: translateY(0);
   }
+}
+
+/* Enhanced drag and drop cross-section behavior */
+.drag-active {
+  pointer-events: none;
+}
+
+.drag-active .drop-zone {
+  pointer-events: auto;
+  z-index: 1000;
+}
+
+/* Better visual feedback for drag over state */
+.drop-zone-container {
+  transition: all 0.3s ease;
+}
+
+.drop-zone-container.drag-target {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+}
+
+/* Improved component dragging visual feedback */
+.component-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.component-card:hover:not(.dragging) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.2);
 }
 

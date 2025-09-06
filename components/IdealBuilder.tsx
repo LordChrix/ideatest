@@ -71,6 +71,10 @@ const IdeaBuilder: React.FC = () => {
       const component = gameConfig.components.find(c => c.id === componentId);
       if (component) {
         addComponent(component);
+        // Add haptic feedback for mobile
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
+        }
       }
     }
   };
@@ -992,7 +996,7 @@ const IdeaBuilder: React.FC = () => {
         <div className="drop-zone-container">
           <h3 className="panel-title">
             <span>🎯</span>
-            <span>Put Your Idea Together</span>
+            <span>Build Your Business Blueprint</span>
             {isTouchDevice && <span className="mobile-instruction">(Tap components to add them)</span>}
           </h3>
           <div className="drop-zone-wrapper">
