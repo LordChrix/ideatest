@@ -1,10 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { gameConfig } from './GameConfig';
 import useGameLogic from '../hooks/useGameLogic';
 import LottieIcon from './LottieIcon';
 import TechIcons from './TechIcons';
 import SocialIcons from './SocialIcons';
+import AnimatedToast from './AnimatedToast';
+import { 
+  pageVariants, 
+  containerVariants, 
+  itemVariants, 
+  cardHoverVariants, 
+  buttonVariants,
+  modalVariants,
+  slideInVariants,
+  springPresets,
+  dropZoneVariants,
+  gestureVariants
+} from '../utils/animations';
 
 interface AchievementModalProps {
   show: boolean;
@@ -13,13 +27,58 @@ interface AchievementModalProps {
 }
 
 const AchievementModal: React.FC<AchievementModalProps> = ({ show, achievement, onClose }) => (
-  <div className={`modal-overlay ${show ? 'active' : ''}`} onClick={onClose}>
-    <div className="achievement-modal">
-      <div className="achievement-icon">🏆</div>
-      <h2 className="achievement-title">{achievement?.title}</h2>
-      <p className="achievement-message">{achievement?.message}</p>
-    </div>
-  </div>
+  <AnimatePresence>
+    {show && (
+      <motion.div 
+        className="modal-overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div 
+          className="achievement-modal"
+          variants={modalVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <motion.div 
+            className="achievement-icon"
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 20,
+              delay: 0.2
+            }}
+          >
+            🏆
+          </motion.div>
+          
+          <motion.h2 
+            className="achievement-title"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            {achievement?.title}
+          </motion.h2>
+          
+          <motion.p 
+            className="achievement-message"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            {achievement?.message}
+          </motion.p>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
 );
 
 const IdeaBuilder: React.FC = () => {
@@ -53,6 +112,22 @@ const IdeaBuilder: React.FC = () => {
   const [showAnimationOverlay, setShowAnimationOverlay] = useState(false);
   const [currentAnimation, setCurrentAnimation] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [gestureScale, setGestureScale] = useState(1);
+
+  // Toast notification state
+  const [toast, setToast] = useState<{
+    show: boolean;
+    type: 'success' | 'error' | 'warning' | 'info';
+    title: string;
+    message: string;
+    icon: string;
+  }>({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    icon: ''
+  });
 
   // Detect touch device on component mount
   useEffect(() => {
@@ -75,8 +150,18 @@ const IdeaBuilder: React.FC = () => {
         if ('vibrate' in navigator) {
           navigator.vibrate(50);
         }
+        // Show animated toast
+        showToast('success', 'Component Added!', `${component.label} added to your blueprint`, '🚀');
       }
     }
+  };
+
+  // Helper function to show animated toasts
+  const showToast = (type: 'success' | 'error' | 'warning' | 'info', title: string, message: string, icon: string) => {
+    setToast({ show: true, type, title, message, icon });
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+    }, 3000);
   };
 
   const toggleComponentSelection = (componentId: string) => {
@@ -769,10 +854,27 @@ const IdeaBuilder: React.FC = () => {
   };
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="container">
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <motion.div 
+          className="container"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
       {/* Header */}
-      <header className="header">
+      <motion.header 
+        className="header"
+        variants={slideInVariants.top}
+        initial="initial"
+        animate="animate"
+        transition={springPresets.gentle}
+      >
         <div className="logo-container">
           <div className="tsm-logo">
             {/* TSM House Agency Logo */}
@@ -820,20 +922,44 @@ const IdeaBuilder: React.FC = () => {
         <div className="sub-tagline">
           <span>🚀 AI Business Plans • Fast • Simple • Ready in Minutes</span>
           <div className="header-controls">
-            <button className="sound-toggle" onClick={toggleSound} title="Toggle Sound">
+            <motion.button 
+              className="sound-toggle" 
+              onClick={toggleSound} 
+              title="Toggle Sound"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={springPresets.stiff}
+            >
               <span>{gameState.soundEnabled ? '🔊' : '🔇'}</span>
-            </button>
-            <button className="fresh-start-btn" onClick={resetEverything} title="Fresh Start - Clear All Data">
+            </motion.button>
+            <motion.button 
+              className="fresh-start-btn" 
+              onClick={resetEverything} 
+              title="Fresh Start - Clear All Data"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={springPresets.stiff}
+            >
               <span>🆕</span>
               <span>Fresh Start</span>
-            </button>
+            </motion.button>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Stats */}
-      <div className="stats-grid">
-        <div className="stat-card">
+      <motion.div 
+        className="stats-grid"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div 
+          className="stat-card"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, y: -2 }}
+          transition={springPresets.stiff}
+        >
           <div className="stat-label">Plans Created</div>
           <div className="stat-value">
             <span className="stat-icon animate-pulse">
@@ -846,8 +972,13 @@ const IdeaBuilder: React.FC = () => {
             </span>
             <span>1,234</span>
           </div>
-        </div>
-        <div className="stat-card">
+        </motion.div>
+        <motion.div 
+          className="stat-card"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, y: -2 }}
+          transition={springPresets.stiff}
+        >
           <div className="stat-label">Solutions Built</div>
           <div className="stat-value">
             <span className="stat-icon animate-bounce">
@@ -860,8 +991,13 @@ const IdeaBuilder: React.FC = () => {
             </span>
             <span>256</span>
           </div>
-        </div>
-        <div className="stat-card">
+        </motion.div>
+        <motion.div 
+          className="stat-card"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, y: -2 }}
+          transition={springPresets.stiff}
+        >
           <div className="stat-label">Real Wins</div>
           <div className="stat-value">
             <span className="stat-icon animate-wiggle">
@@ -874,8 +1010,13 @@ const IdeaBuilder: React.FC = () => {
             </span>
             <span>89</span>
           </div>
-        </div>
-        <div className="stat-card">
+        </motion.div>
+        <motion.div 
+          className="stat-card"
+          variants={itemVariants}
+          whileHover={{ scale: 1.05, y: -2 }}
+          transition={springPresets.stiff}
+        >
           <div className="stat-label">Success Rate</div>
           <div className="stat-value">
             <span className="stat-icon animate-grow">
@@ -888,8 +1029,8 @@ const IdeaBuilder: React.FC = () => {
             </span>
             <span>{gameState.stats.ideasCount > 0 ? Math.min(100, gameState.stats.ideasCount * 10) : 0}%</span>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Instructions */}
       <div className="instructions-card">
@@ -934,11 +1075,21 @@ const IdeaBuilder: React.FC = () => {
               <span>⚡</span>
               <span>Quick Start Packs</span>
             </h3>
-            <div className="quick-packs-grid">
-              {quickStartPacks.map((pack) => (
-                <div 
+            <motion.div 
+              className="quick-packs-grid"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {quickStartPacks.map((pack, index) => (
+                <motion.div 
                   key={pack.id}
                   className="quick-pack-card"
+                  variants={cardHoverVariants}
+                  initial="initial"
+                  animate="initial"
+                  whileHover="hover"
+                  whileTap="tap"
                   onClick={() => selectQuickStartPack(pack.id)}
                 >
                   <div className="pack-emoji">{pack.emoji}</div>
@@ -947,9 +1098,9 @@ const IdeaBuilder: React.FC = () => {
                     <p className="pack-description">{pack.description}</p>
                     <div className="pack-component-count">{pack.components.length} tools</div>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
 
           <h3 className="panel-title">
@@ -962,7 +1113,7 @@ const IdeaBuilder: React.FC = () => {
                 {gameConfig.components.map((component, index) => (
                   <Draggable key={component.id} draggableId={component.id} index={index} isDragDisabled={isTouchDevice}>
                     {(provided, snapshot) => (
-                      <div
+                      <motion.div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
@@ -971,6 +1122,12 @@ const IdeaBuilder: React.FC = () => {
                         }`}
                         onClick={isTouchDevice ? () => handleComponentSelect(component.id) : undefined}
                         title={component.description}
+                        variants={cardHoverVariants}
+                        initial="initial"
+                        animate={snapshot.isDragging ? "hover" : "initial"}
+                        whileHover={!snapshot.isDragging ? "hover" : undefined}
+                        whileTap={!snapshot.isDragging ? "tap" : undefined}
+                        transition={springPresets.stiff}
                       >
                         <div className="component-icon-wrapper">
                           {getComponentIcon(component.id)}
@@ -982,7 +1139,7 @@ const IdeaBuilder: React.FC = () => {
                             <span className="add-icon">+</span>
                           </div>
                         )}
-                      </div>
+                      </motion.div>
                     )}
                   </Draggable>
                 ))}
@@ -1002,10 +1159,14 @@ const IdeaBuilder: React.FC = () => {
           <div className="drop-zone-wrapper">
             <Droppable droppableId="drop-zone">
               {(provided, snapshot) => (
-                <div 
+                <motion.div 
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={`drop-zone ${snapshot.isDraggingOver ? 'drag-over' : ''} ${isTouchDevice ? 'touch-mode' : ''}`}
+                  variants={dropZoneVariants}
+                  initial="initial"
+                  animate={snapshot.isDraggingOver ? "dragOver" : "initial"}
+                  transition={springPresets.stiff}
                 >
             {gameState.droppedComponents.length === 0 ? (
               <div className="drop-zone-empty">
@@ -1055,30 +1216,56 @@ const IdeaBuilder: React.FC = () => {
               </div>
             )}
             {provided.placeholder}
-                </div>
+                </motion.div>
               )}
             </Droppable>
           </div>
-          <div className="action-buttons">
-            <button 
+          <motion.div 
+            className="action-buttons"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.button 
               className={`btn btn-primary ${isGenerating ? 'btn-generating' : ''}`}
               disabled={gameState.droppedComponents.length < 2 || isGenerating}
               onClick={handleGenerate}
+              variants={buttonVariants}
+              whileHover={!isGenerating ? "hover" : undefined}
+              whileTap={!isGenerating ? "tap" : undefined}
+              animate={isGenerating ? { scale: [1, 1.05, 1], opacity: [1, 0.8, 1] } : undefined}
+              transition={isGenerating ? { repeat: Infinity, duration: 1.5 } : springPresets.stiff}
             >
               <span>{isGenerating ? (generationStep || 'Creating Your Startup...') : 'Generate Startup Idea'}</span>
               {isGenerating ? (
-                <span className="loading-spinner"></span>
+                <motion.span 
+                  className="loading-spinner"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                >
+                </motion.span>
               ) : (
-                <span>🚀</span>
+                <motion.span
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                >
+                  🚀
+                </motion.span>
               )}
-            </button>
+            </motion.button>
             {gameState.droppedComponents.length > 0 && (
-              <button className="btn btn-danger" onClick={clearComponents}>
+              <motion.button 
+                className="btn btn-danger" 
+                onClick={clearComponents}
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
+              >
                 <span>Clear All</span>
                 <span>🗑️</span>
-              </button>
+              </motion.button>
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* Results Panel */}
@@ -1092,7 +1279,7 @@ const IdeaBuilder: React.FC = () => {
             {/* Desktop Share Button */}
             {gameState.generatedIdeas.length > 0 && (
               <div className="desktop-share-button">
-                <button 
+                <motion.button 
                   className="share-header-btn"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1100,10 +1287,13 @@ const IdeaBuilder: React.FC = () => {
                   }}
                   title="Share your latest business plan"
                   aria-label="Share your plan"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={springPresets.stiff}
                 >
                   <span className="share-icon">↗</span>
                   <span>Share</span>
-                </button>
+                </motion.button>
                 
                 {showHeaderShareDropdown && (
                   <div className="share-dropdown header-dropdown" onClick={(e) => e.stopPropagation()}>
@@ -1161,15 +1351,39 @@ const IdeaBuilder: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="results-scroll-container">
+          <motion.div 
+            className="results-scroll-container"
+            style={{ overflowY: "auto" }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
             {gameState.generatedIdeas.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state-icon">🎯</div>
                 <div className="empty-state-text">No blueprints yet. Start building!</div>
               </div>
             ) : (
-              gameState.generatedIdeas.map(idea => (
-                <div key={idea.id} className="blueprint-card">
+              gameState.generatedIdeas.map((idea, index) => (
+                <motion.div 
+                  key={idea.id} 
+                  className="blueprint-card"
+                  variants={itemVariants}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  drag={isTouchDevice ? "x" : false}
+                  dragConstraints={{ left: -100, right: 100 }}
+                  onDragEnd={(event, info) => {
+                    if (Math.abs(info.offset.x) > 50) {
+                      // Trigger haptic feedback if available
+                      if ('vibrate' in navigator) {
+                        navigator.vibrate(30);
+                      }
+                    }
+                  }}
+                  whileDrag={isTouchDevice ? { scale: 1.05, rotateZ: 3 } : undefined}
+                >
                   <div className="blueprint-header">
                     <div className="blueprint-icon">📋</div>
                     <div className="blueprint-title">
@@ -1214,27 +1428,33 @@ const IdeaBuilder: React.FC = () => {
                     </div>
                     
                     <div className="blueprint-actions">
-                      <button 
+                      <motion.button 
                         className="btn-download"
                         onClick={() => downloadBlueprint(idea)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={springPresets.stiff}
                       >
                         <span>📥</span>
                         <span>Download Blueprint</span>
-                      </button>
-                      <button 
+                      </motion.button>
+                      <motion.button 
                         className="btn-consultation"
                         onClick={() => openConsultationModal(idea)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={springPresets.stiff}
                       >
                         <span>💼</span>
                         <span>Get Free Consultation</span>
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
                   
-                </div>
+                </motion.div>
               ))
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -1415,8 +1635,20 @@ const IdeaBuilder: React.FC = () => {
           )}
         </div>
       )}
-      </div>
+
+      {/* Animated Toast Notifications */}
+      <AnimatedToast
+        show={toast.show}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        icon={toast.icon}
+        onClose={() => setToast(prev => ({ ...prev, show: false }))}
+      />
+        </motion.div>
+      </motion.div>
     </DragDropContext>
+    </motion.div>
   );
 };
 
