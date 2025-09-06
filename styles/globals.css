@@ -667,17 +667,15 @@ body::after {
 }
 
 .component-card.dragging {
-    opacity: 0.95;
+    opacity: 1;
     cursor: grabbing !important;
-    transform: scale(1.02) rotate(1deg);
-    box-shadow: 0 25px 50px rgba(6, 182, 212, 0.5), 0 0 0 3px var(--primary), 0 0 30px rgba(6, 182, 212, 0.7);
+    box-shadow: 0 20px 40px rgba(6, 182, 212, 0.4), 0 0 0 2px var(--primary);
     z-index: 10000 !important;
     border: 2px solid var(--primary);
-    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05));
-    backdrop-filter: blur(8px);
-    animation: dragPulse 0.6s ease-in-out infinite alternate;
-    pointer-events: none; /* Prevent interaction while dragging */
-    transition: none !important; /* Remove transitions while dragging */
+    background: rgba(255, 255, 255, 0.95);
+    /* Removed pointer-events: none - was breaking drop detection */
+    /* Removed transform - let react-beautiful-dnd handle it */
+    /* Removed animation - was causing jerky movement */
 }
 
 .component-emoji {
@@ -809,11 +807,10 @@ body::after {
 }
 
 .drop-zone.drag-over {
-    background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.1));
-    border: 3px dashed var(--primary);
-    transform: scale(1.03);
-    box-shadow: 0 0 0 6px rgba(6, 182, 212, 0.15), 0 10px 30px rgba(6, 182, 212, 0.3);
-    animation: dropZonePulse 1s ease-in-out infinite alternate;
+    background: rgba(6, 182, 212, 0.08);
+    border: 2px dashed var(--primary);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    /* Removed animation and transform for smoother experience */
 }
 
 .drop-zone-empty {
@@ -1819,9 +1816,7 @@ body::after {
     opacity: 0.1;
 }
 
-.component-card.dragging::before {
-    opacity: 0.3;
-}
+/* Removed dragging::before - not needed */
 
 /* Better Drop Zone Feedback */
 .drop-zone {
@@ -3690,10 +3685,7 @@ button:focus-visible,
   transition: all 0.3s ease;
 }
 
-.drop-zone.drag-over {
-  border-color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-}
+/* Duplicate drop-zone.drag-over removed - see main style above */
 
 /* Mobile Responsive Fixes */
 @media (max-width: 768px) {
@@ -3811,15 +3803,7 @@ button:focus-visible,
   box-shadow: 0 8px 25px rgba(6, 182, 212, 0.25);
 }
 
-/* Enhanced mobile drag behavior */
-.component-card.dragging {
-  transform: rotate(1deg) scale(1.02);
-  opacity: 0.9;
-  cursor: grabbing;
-  z-index: 9999;
-  pointer-events: none;
-  transition: none !important;
-}
+/* Duplicate dragging styles removed - see main .component-card.dragging above */
 
 /* Better drag handle for touch devices */
 @media (max-width: 768px) {
@@ -3898,14 +3882,7 @@ button:focus-visible,
 }
 
 /* Enhanced drag and drop cross-section behavior */
-.drag-active {
-  pointer-events: none;
-}
-
-.drag-active .drop-zone {
-  pointer-events: auto;
-  z-index: 1000;
-}
+/* Removed drag-active styles - was preventing proper drag behavior */
 
 /* Better visual feedback for drag over state */
 .drop-zone-container {
@@ -3917,14 +3894,34 @@ button:focus-visible,
   filter: brightness(1.1);
 }
 
-/* Improved component dragging visual feedback */
+/* Improved component hover feedback */
 .component-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  will-change: transform;
+  cursor: grab;
+  transition: box-shadow 0.2s ease;
+  /* Removed transform transition - interferes with dragging */
 }
 
 .component-card:hover:not(.dragging) {
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(6, 182, 212, 0.2);
+}
+
+/* React Beautiful DnD specific fixes */
+[data-rbd-draggable-context-id] {
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Ensure drop zone is always droppable */
+.drop-zone {
+  min-height: 120px;
+  position: relative;
+}
+
+/* Fix for dragging transform */
+.component-card.dragging {
+  /* Let react-beautiful-dnd handle the transform */
+  transform: none !important;
 }
 
